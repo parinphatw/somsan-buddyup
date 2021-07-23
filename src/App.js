@@ -14,4 +14,7 @@ function App() {
   );
 }
 
+document.title =
+  "Skooldio (สคูลดิโอ) | คอร์สเรียนออนไลน์และเวิร์กชอปพัฒนาทักษะ";
+
 export default App;
