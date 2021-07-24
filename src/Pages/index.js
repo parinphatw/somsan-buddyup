@@ -2,7 +2,8 @@ import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 
 import Home from "./Home";
-import VideoTest from "./VideoTest";
+import VideoTestA from "./VideoTest_A";
+import VideoTestB from "./VideoTest_B";
 
 const RouteApp = () => {
   return (
@@ -11,8 +12,11 @@ const RouteApp = () => {
       <Route exact path="/">
         <Redirect to="/home" />
       </Route>
-      <Route exact path="/videotest">
-        <VideoTest />
+      <Route exact path="/videotest_a">
+        <VideoTestA />
+      </Route>
+      <Route exact path="/videotest_b">
+        <VideoTestB />
       </Route>
     </Switch>
   );
