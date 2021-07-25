@@ -1,36 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useHistory } from "react-router-dom";
+import React, { useRef, useState } from "react";
 import { ReactComponent as HangupIcon } from "../../icons/hangup.svg";
 import { ReactComponent as MoreIcon } from "../../icons/more-vertical.svg";
 import { ReactComponent as CopyIcon } from "../../icons/copy.svg";
 
-const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
-  // const [webcamActive, setWebcamActive] = useState(false);
+const VideoChat = ({ mode, callId, setPage, pc, firestore }) => {
+  const [webcamActive, setWebcamActive] = useState(false);
   const [roomId, setRoomId] = useState(callId);
 
   const localRef = useRef();
   const remoteRef = useRef();
 
-  const [video, setVideo] = useState(false);
-  const [audio, setAudio] = useState(false);
-
-  let localStream;
-  let remoteStream;
-
-  const history = useLocation();
-  useEffect(() => {
-    console.log("history:", window.location);
-    setupSources();
-  }, [audio, video]);
   const setupSources = async () => {
-    console.log("i found you");
-    localStream =
-      audio || video
-        ? await navigator.mediaDevices.getUserMedia({ video, audio })
-        : null;
-    remoteStream = new MediaStream();
+    const localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    const remoteStream = new MediaStream();
 
-    localStream?.getTracks().forEach((track) => {
+    localStream.getTracks().forEach((track) => {
       pc.addTrack(track, localStream);
     });
 
@@ -43,12 +30,14 @@ const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
     localRef.current.srcObject = localStream;
     remoteRef.current.srcObject = remoteStream;
 
+    setWebcamActive(true);
+
     if (mode === "create") {
       const callDoc = firestore.collection("calls").doc();
       const offerCandidates = callDoc.collection("offerCandidates");
       const answerCandidates = callDoc.collection("answerCandidates");
 
-      await setRoomId(callDoc.id);
+      setRoomId(callDoc.id);
 
       pc.onicecandidate = (event) => {
         event.candidate && offerCandidates.add(event.candidate.toJSON());
@@ -151,47 +140,46 @@ const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
     window.location.reload();
   };
 
-  const handleMicClick = async () => {
-    await setAudio(!audio);
-    if (audio || video) {
-      localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
-    } else if (localStream) {
-      await localStream.getTracks().map((track) => track.stop());
-      localStream = null;
-      localRef.current.srcObject = null;
-    }
-  };
-
-  const handleWebCamClick = async () => {
-    await setVideo(!video);
-    // localStream?.stop();
-    if (audio || video) {
-      localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
-    } else if (localStream) {
-      await localStream.getTracks().map((track) => track.stop());
-      localStream = null;
-      localRef.current.srcObject = null;
-    }
-  };
-
   return (
-    <div>
-      <video ref={localRef} autoPlay playsInline muted />
-      <video ref={remoteRef} autoPlay playsInline />
-      <button onClick={handleMicClick}>Microphone</button>
-      <button onClick={handleWebCamClick}>Web Cam</button>
-      {mode === "create" && (audio || video) && (
+    <div className="videos">
+      <video ref={localRef} autoPlay playsInline className="local" muted />
+      <video ref={remoteRef} autoPlay playsInline className="remote" />
+
+      <div className="buttonsContainer">
         <button
-          onClick={() => {
-            console.log("room id:", roomId);
-            navigator.clipboard.writeText(
-              window.location.origin + "/videotest_b/" + roomId
-            );
-          }}
+          onClick={hangUp}
+          disabled={!webcamActive}
+          className="hangup button"
         >
-          Copy Code
+          <HangupIcon />
+          Hangup
         </button>
-      )}
+        <div tabIndex={0} role="button" className="more button">
+          <MoreIcon />
+          <div className="popover">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(roomId);
+              }}
+            >
+              <CopyIcon />
+              Copy joining code
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="modalContainer">
+        <div className="modal">
+          <h3>Turn on your camera and microphone and start the call</h3>
+          <div className="container">
+            <button onClick={() => setPage("home")} className="secondary">
+              Cancel
+            </button>
+            <button onClick={setupSources}>Start</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

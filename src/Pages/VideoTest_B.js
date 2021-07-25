@@ -28,26 +28,20 @@ const VideoTestB = styled((props) => {
 
   return (
     <div {...props}>
-      <div>Rest of app here 5555555</div>
+      <div>Rest of app here</div>
 
-      <VideoPlayer user={"user_a"} roomId={"user_a"} />
+      <VideoPlayer user={"user_x"} roomId={"user_x"} />
 
       <div>Rest of app here</div>
-      {currentPage === "home" ? (
-        <VideoChatMenu
-          joinCode={joinCode}
-          setJoinCode={setJoinCode}
-          setPage={setCurrentPage}
-        />
-      ) : (
-        <VideoChat
-          mode={currentPage}
-          callId={joinCode}
-          setPage={setCurrentPage}
-          firestore={firestore}
-          pc={pc}
-        />
-      )}
+
+      <VideoChat
+        mode={"join"}
+        callId={code}
+        setPage={setCurrentPage}
+        setJoinCode={setJoinCode}
+        firestore={firestore}
+        pc={pc}
+      />
     </div>
   );
 })`

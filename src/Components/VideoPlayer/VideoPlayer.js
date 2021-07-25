@@ -42,11 +42,9 @@ export const VideoPlayer = (props) => {
   let interval;
   const handleStart = () => {
     interval = setInterval(async () => {
-      const realCurrentTime = parseInt(
-        playerRef.current?.getCurrentTime() ?? 0
-      );
+      const realCurrentTime = parseInt(playerRef.current?.getCurrentTime());
       // console.log("diff:", currentTime - realCurrentTime);
-      if (realCurrentTime !== currentTime) {
+      if (!Number.isNaN(realCurrentTime) && realCurrentTime !== currentTime) {
         // console.log("bugs of current time:", realCurrentTime);
         await rtdbRef.update({ currentTime: realCurrentTime });
         await setCurrentTime(realCurrentTime);
@@ -62,20 +60,6 @@ export const VideoPlayer = (props) => {
   const handleEnded = () => {
     clearInterval(interval);
   };
-
-  // return () => clearInterval(i);
-  // }, []);
-
-  // to be deleted
-  // useEffect(() => {
-  //   console.log(playerRef);
-  //   console.log(playerRef.current?.getCurrentTime());
-  //   console.log(playerRef.current?.props?.playing);
-  //   console.log("current fucking time:", currentTime);
-
-  //   // setVideoState({ playing: true, currentTime: 20 });
-  //   // console.log("video state:", videoState);
-  // }, [videoState.playing]);
 
   const handlePlay = async () => {
     console.log("continue playing now...");
