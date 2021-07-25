@@ -15,7 +15,7 @@ const RouteApp = () => {
       <Route exact path="/videotest_a">
         <VideoTestA />
       </Route>
-      <Route exact path="/videotest_b">
+      <Route exact path="/videotest_b/:code">
         <VideoTestB />
       </Route>
     </Switch>
