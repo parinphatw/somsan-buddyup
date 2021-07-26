@@ -90,7 +90,7 @@ export const VideoPlayer = (props) => {
   return (
     <>
       <ReactPlayer
-        url="https://www.youtube.com/watch?v=aMyO6GNkfpo&ab_channel=KeshiVEVO"
+        url="https://www.youtube.com/watch?v=U2l1xgpVsuo&list=PL0ROnaCzUGB4ieaQndKybT9xyoq2n9NGq&ab_channel=somchaiSPJ"
         ref={playerRef}
         controls
         autoPlay
@@ -102,8 +102,7 @@ export const VideoPlayer = (props) => {
         onSeek={handleSeek}
         playbackRate={1}
         volume={0.01}
-        width="896px"
-        height="504px"
+        width="600px"
       />
       {/* <button onClick={handleClick}>click me</button> */}
     </>

@@ -3,7 +3,14 @@ import VideoPlayer from "../Components/VideoPlayer"; // point to where the funct
 import styled from "styled-components";
 import firebase from "../Utils/firebase";
 import VideoChat from "../Components/VideoChat";
-import VideoChatMenu from "../Components/VideoChatMenu/VideoChatMenu";
+
+const Container = styled(({ className, children }) => {
+  return <div className={className}>{children}</div>;
+})`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`;
 
 const firestore = firebase.firestore();
 
@@ -19,25 +26,21 @@ const servers = {
 const pc = new RTCPeerConnection(servers);
 
 const VideoTestA = styled((props) => {
-  const [currentPage, setCurrentPage] = useState("home");
   const [joinCode, setJoinCode] = useState("");
 
   return (
     <div {...props}>
-      <div>Rest of app here</div>
+      <Container>
+        <VideoPlayer user={"user_x"} roomId={"user_x"} />
 
-      <VideoPlayer user={"user_x"} roomId={"user_x"} />
-
-      <div>Rest of app here</div>
-
-      <VideoChat
-        mode={"create"}
-        callId={joinCode}
-        setPage={setCurrentPage}
-        setJoinCode={setJoinCode}
-        firestore={firestore}
-        pc={pc}
-      />
+        <VideoChat
+          mode={"create"}
+          callId={joinCode}
+          setJoinCode={setJoinCode}
+          firestore={firestore}
+          pc={pc}
+        />
+      </Container>
     </div>
   );
 })`

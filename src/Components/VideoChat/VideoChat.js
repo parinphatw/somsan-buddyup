@@ -1,27 +1,46 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useHistory } from "react-router-dom";
-import { ReactComponent as HangupIcon } from "../../icons/hangup.svg";
-import { ReactComponent as MoreIcon } from "../../icons/more-vertical.svg";
-import { ReactComponent as CopyIcon } from "../../icons/copy.svg";
+import styled from "styled-components";
+import LinkIcon from "@material-ui/icons/Link";
+import Button from "@material-ui/core/Button";
+import { StylesProvider } from "@material-ui/core/styles";
 
-const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
+const VideoChatContainer = styled(({ className, children }) => {
+  return <div className={className}>{children}</div>;
+})`
+  display: flex;
+  flex-direction: column;
+  margin-left: 30px;
+`;
+
+const VideoChat = ({ mode, callId, pc, firestore }) => {
   // const [webcamActive, setWebcamActive] = useState(false);
   const [roomId, setRoomId] = useState(callId);
+  const [videoChat, setVideoChat] = useState(false);
 
   const localRef = useRef();
   const remoteRef = useRef();
 
-  const [video, setVideo] = useState(false);
-  const [audio, setAudio] = useState(false);
+  const [video, setVideo] = useState(true);
+  const [audio, setAudio] = useState(true);
 
   let localStream;
   let remoteStream;
 
-  const history = useLocation();
+  useEffect(() => {
+    setVideoChat(true);
+  }, []);
+
   useEffect(() => {
     console.log("history:", window.location);
     setupSources();
   }, [audio, video]);
+
+  useEffect(() => {
+    setInterval(() => {
+      console.log(pc.connectionState);
+    }, 2000);
+  }, []);
+
   const setupSources = async () => {
     console.log("i found you");
     localStream =
@@ -114,11 +133,13 @@ const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
           }
         });
       });
+      console.log("connection state:", pc.connectionState);
     }
 
     pc.onconnectionstatechange = (event) => {
       if (pc.connectionState === "disconnected") {
         hangUp();
+        setVideoChat(false);
       }
     };
   };
@@ -151,48 +172,70 @@ const VideoChat = ({ mode, callId, setPage, setJoinCode, pc, firestore }) => {
     window.location.reload();
   };
 
-  const handleMicClick = async () => {
-    await setAudio(!audio);
-    if (audio || video) {
-      localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
-    } else if (localStream) {
-      await localStream.getTracks().map((track) => track.stop());
-      localStream = null;
-      localRef.current.srcObject = null;
-    }
-  };
+  // const handleMicClick = async () => {
+  //   await setAudio(!audio);
+  //   if (audio || video) {
+  //     localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
+  //   } else if (localStream) {
+  //     await localStream.getTracks().map((track) => track.stop());
+  //     localStream = null;
+  //     localRef.current.srcObject = null;
+  //   }
+  // };
 
-  const handleWebCamClick = async () => {
-    await setVideo(!video);
-    // localStream?.stop();
-    if (audio || video) {
-      localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
-    } else if (localStream) {
-      await localStream.getTracks().map((track) => track.stop());
-      localStream = null;
-      localRef.current.srcObject = null;
-    }
-  };
+  // const handleWebCamClick = async () => {
+  //   await setVideo(!video);
+  //   // localStream?.stop();
+  //   if (audio || video) {
+  //     localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
+  //   } else if (localStream) {
+  //     await localStream.getTracks().map((track) => track.stop());
+  //     localStream = null;
+  //     localRef.current.srcObject = null;
+  //   }
+  // };
 
-  return (
-    <div>
-      <video ref={localRef} autoPlay playsInline muted />
-      <video ref={remoteRef} autoPlay playsInline />
-      <button onClick={handleMicClick}>Microphone</button>
-      <button onClick={handleWebCamClick}>Web Cam</button>
-      {mode === "create" && (audio || video) && (
-        <button
+  const CopyLinkButton = styled(({ className }) => {
+    return (
+      <StylesProvider injectFirst>
+        <Button
           onClick={() => {
             console.log("room id:", roomId);
+            console.log("connection state:", pc.connectionState);
             navigator.clipboard.writeText(
               window.location.origin + "/videotest_b/" + roomId
             );
           }}
+          className={className}
+          variant={"contained"}
         >
-          Copy Code
-        </button>
-      )}
-    </div>
+          <LinkIcon />
+          <div>Copy Link</div>
+        </Button>
+      </StylesProvider>
+    );
+  })`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #faa91a;
+  `;
+
+  return (
+    videoChat && (
+      <div>
+        <VideoChatContainer className={"container"}>
+          <video ref={localRef} autoPlay playsInline muted width={200} />
+          <video ref={remoteRef} autoPlay playsInline width={200} />
+          {/* <button onClick={handleMicClick}>Microphone</button>
+          <button onClick={handleWebCamClick}>Web Cam</button> */}
+          {mode === "create" &&
+            (audio || video) &&
+            pc.connectionState === "new" && <CopyLinkButton />}
+        </VideoChatContainer>
+      </div>
+    )
   );
 };
 
